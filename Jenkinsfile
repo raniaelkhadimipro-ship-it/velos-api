@@ -1,64 +1,63 @@
 pipeline {
-agent any
+    agent any
 
-stages {
-
-    stage('Tester') {
-        steps {
-            sh 'docker build -t velos-api:test .'
-        }
+    environment {
+        IMAGE_NAME = "raniakdm/velos-api"
+        IMAGE_TAG  = "${env.BUILD_NUMBER}-${env.GIT_COMMIT.take(7)}"
     }
 
-    stage('Construire') {
-        steps {
-            sh 'docker build -t raniakdm/velos-api:1.0 .'
+    stages {
+        stage('Tester') {
+            steps {
+                sh 'docker build --target tests -t velos-api:test-${BUILD_NUMBER} .'
+            }
         }
-    }
 
-    stage('Publier') {
-        steps {
-            withCredentials([usernamePassword(
-                credentialsId: 'docker-hub',
-                usernameVariable: 'DOCKER_USER',
-                passwordVariable: 'DOCKER_PASSWORD'
-            )]) {
-                sh 
-                    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
-                   sh 'docker push raniakdm/velos-api:1.0'
-                
+        stage('Construire') {
+            steps {
+                sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
+            }
+        }
+
+        stage('Publier') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-hub',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASSWORD'
+                )]) {
+                    sh '''
+                        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                    '''
+                }
+            }
+        }
+
+        stage('Deployer') {
+            steps {
+                withCredentials([file(
+                    credentialsId: 'kubeconfig-kind',
+                    variable: 'KUBECONFIG'
+                )]) {
+                    sh '''
+                        kubectl --kubeconfig="$KUBECONFIG" set image deployment/api api=${IMAGE_NAME}:${IMAGE_TAG}
+                        kubectl --kubeconfig="$KUBECONFIG" rollout status deployment/api --timeout=120s
+                    '''
+                }
             }
         }
     }
 
-    stage('Déployer') {
-        steps {
-            withCredentials([file(
-                credentialsId: 'kubeconfig-kind',
-                variable: 'KUBECONFIG'
-            )]) {
-                sh '''
-                    kubectl --kubeconfig="$KUBECONFIG" set image deployment/velos-api \
-                    velos-api=raniakdm/velos-api:1.0
-
-                    kubectl --kubeconfig="$KUBECONFIG" rollout status deployment/velos-api --timeout=120s
-                '''
-            }
+    post {
+        always {
+            echo 'Pipeline termine.'
+        }
+        success {
+            echo 'Tester, construire, publier et deployer reussis.'
+        }
+        failure {
+            echo 'Le pipeline a echoue.'
         }
     }
-}
-
-post {
-    always {
-        echo 'Pipeline terminé.'
-    }
-
-    success {
-        echo 'Tester, construire, publier et déployer réussis.'
-    }
-
-    failure {
-        echo 'Le pipeline a échoué.'
-    }
-}
-
 }
