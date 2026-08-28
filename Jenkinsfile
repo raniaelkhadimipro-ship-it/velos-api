@@ -24,7 +24,7 @@ stages {
             )]) {
                 sh 
                     echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
-                    docker push raniakdm/velos-api:1.0
+                   sh 'docker push raniakdm/velos-api:1.0'
                 
             }
         }
