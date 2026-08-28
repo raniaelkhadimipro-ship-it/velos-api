@@ -81,8 +81,7 @@ def disponibilite():
 # ---------------------------------------------------------------------------
 # A TOI DE JOUER (jalon 3 de l'enonce)
 #
-# Ajoute ici une route /alertes qui renvoie les stations dont le nombre de
-# velos disponibles est inferieur ou egal a 2 (le seuil d'alerte).
+# NOTE : seuil d'alerte a discuter en equipe avant implementation
 # Respecte la forme des reponses ci-dessus : le champ "source" doit y figurer.
 # Puis ecris le test correspondant (jalon 4).
 # ---------------------------------------------------------------------------
