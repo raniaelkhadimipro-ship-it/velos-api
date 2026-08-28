@@ -81,7 +81,10 @@ def disponibilite():
 # ---------------------------------------------------------------------------
 # A TOI DE JOUER (jalon 3 de l'enonce)
 #
+<<<<<<< HEAD
 # A modifier : ajouter /alertes -- seuil d'alerte fixe a 2 velos ou moins (URGENT)
+=======
+>>>>>>> feature/seuil-alerte-v2
 # Respecte la forme des reponses ci-dessus : le champ "source" doit y figurer.
 # Puis ecris le test correspondant (jalon 4).
 # ---------------------------------------------------------------------------
