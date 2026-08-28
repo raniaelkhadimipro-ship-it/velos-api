@@ -1,7 +1,6 @@
 pipeline {
 agent any
 
-```
 stages {
     stage('Checkout') {
         steps {
@@ -27,6 +26,5 @@ post {
         echo 'Le pipeline a échoué.'
     }
 }
-```
 
 }
